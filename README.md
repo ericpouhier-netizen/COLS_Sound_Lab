@@ -20,4 +20,4 @@ CC BY 4.0
 
 Citation
 ---------
-Éric Pouhier (2025). COLS Sound Lab — Listening to Integers (v24). Zenodo. DOI: 10.5281/zenodo.XXXXXXX
+Éric Pouhier (2025). COLS Sound Lab — Listening to Integers (v24). Zenodo. DOI: 10.5281/zenodo.17385769
