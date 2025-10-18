@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>COLS Sound Lab — Listening to Integers (v24)</title>
+<meta name="description" content="An interactive, self-contained audio laboratory: each prime-power becomes a voice; periods are estimated on arithmetic signals and mapped to frequencies (f=K/T). 12-TET option, chord tools, tempo-sync arpeggio, WAV export.">
+<style>
+  :root{
+    --bg:#0b1220;--panel:#0f172a;--ink:#e5e7eb;--muted:#93a2b8;--grid:#1f2937;
+    --accent:#60a5fa;--ok:#34d399;--warn:#f59e0b;--bad:#ef4444;
+  }
+  *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  body{margin:0;background:var(--bg);color:var(--ink)}
+  header{padding:20px;border-bottom:1px solid var(--grid);background:#0d1530}
+  header h1{margin:0;font-size:22px;letter-spacing:.2px}
+  header .sub{margin-top:8px;color:var(--muted);font-size:14px;max-width:960px}
+  .wrap{max-width:1120px;margin:0 auto;padding:18px;display:grid;grid-template-columns:1fr 330px;gap:16px}
+  @media (max-width:1000px){.wrap{grid-template-columns:1fr}}
+  .col{display:flex;flex-direction:column;gap:16px}
+  .card{background:var(--panel);border:1px solid var(--grid);border-radius:12px;padding:16px}
+  .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  @media (max-width:800px){.cards{grid-template-columns:1fr}}
+  .item{display:flex;flex-direction:column;gap:10px;border:1px solid #223048;border-radius:12px;padding:14px;background:#0c1629}
+  .item h3{margin:0;font-size:16px}
+  .muted{color:var(--muted)}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  a.btn{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:8px;border:1px solid #2a3b56;background:#10203a;color:#e5e7eb;text-decoration:none;font-weight:600}
+  a.btn.primary{background:var(--accent);border-color:#2563eb;color:#06152b}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid #2a3b56;font-size:12px;color:#cbd5e1}
+  footer{max-width:1120px;margin:16px auto 32px;color:#8aa0bf;font-size:12px;padding:0 18px}
+  .sep{height:1px;background:var(--grid);margin:12px 0}
+  code{background:#0b1a34;padding:2px 6px;border-radius:6px;border:1px solid #223048}
+  .lead{font-size:15px;line-height:1.65}
+</style>
+</head>
+<body>
+<header>
+  <h1>COLS Sound Lab — Listening to Integers (v24)</h1>
+  <div class="sub">
+    Turn integers into <em>sound</em>. Each prime-power <code>p^e</code> becomes a voice; its period is
+    estimated on the arithmetic signal and mapped to a frequency <code>f = K / T</code>.
+    Optional 12-TET quantisation, chord tools, tempo-sync arpeggios, and WAV export — all in a self-contained HTML.
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- LEFT -->
+  <section class="col">
+    <div class="card">
+      <h2 style="margin:0 0 12px 0">Interactive audio lab</h2>
+      <div class="cards">
+
+        <div class="item">
+          <h3>🎧 Sound Lab (multi-voice p<sup>e</sup>)</h3>
+          <div class="muted">Analyse → select voices → map <em>f=K/T</em> → play chords/arpeggios → <strong>export WAV</strong>. Self-contained; works offline.</div>
+          <div class="row">
+            <a class="btn primary" href="COLS_Sound_Lab_multi_voice_v24.html">Open</a>
+            <span class="badge">HTML</span>
+            <span class="badge">Self-contained</span>
+          </div>
+        </div>
+
+        <div class="item">
+          <h3>📄 Listening to Integers — Paper</h3>
+          <div class="muted">Theory: period estimators (Hann + ACF promotion), acoustic density, practical recipes.</div>
+          <div class="row">
+            <a class="btn" href="COLS—Listening to Integers_V6_FINAL.pdf">Open PDF</a>
+            <span class="badge">Research paper</span>
+          </div>
+        </div>
+
+        <div class="item">
+          <h3>📘 User Manual (V4)</h3>
+          <div class="muted">Guided explorations: truth at octave-0, timbre of primes vs squares, pq beats, chord detection.</div>
+          <div class="row">
+            <a class="btn" href="COLS_Sound_Lab_User_Manual_V4_2025_Readable_Explorations.docx">Open DOCX</a>
+            <span class="badge">Manual</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 10px 0">For everyone — Why “listening to integers” matters</h2>
+      <p class="lead">
+        Two and a half millennia after <strong>Pythagoras</strong> plucked a monochord and heard whole numbers as pure consonances,
+        we still wonder: <em>how can arithmetic, so digital and discrete, give birth to continuous harmony?</em>
+        The <strong>Coupled Order Lattice System (COLS)</strong> answers by building a <em>formal bridge</em>:
+        modular residues (discrete) generate <em>audible</em> harmonic combs (continuous).
+        Each prime-power acts as a voice whose period is read in arithmetic space and rendered as a frequency in acoustic space —
+        a direct passage from integer logic to geometry and sound.
+      </p>
+      <p class="lead">
+        What you hear is not a metaphor: it is the <em>structure of the number</em>, made audible.
+        The lab estimates per-factor periods with a Hann-windowed sinusoidal scan and promotes the fundamental via ACF,
+        then maps <code>f = K / T</code> with optional 12-TET. You can blend voices into chords, sweep arpeggios synced to tempo,
+        and export WAV — a reproducible, browser-native experiment where mathematics becomes music.
+      </p>
+    </div>
+  </section>
+
+  <!-- RIGHT -->
+  <aside class="col">
+    <div class="card">
+      <h2 style="margin:0 0 10px 0">DOI & citation</h2>
+      <div class="muted">
+        <strong>Zenodo (DOI):</strong>
+        <br>
+        <a href="https://doi.org/10.5281/zenodo.17385769" style="color:#93c5fd">https://doi.org/10.5281/zenodo.17385769</a>
+      </div>
+      <div class="sep"></div>
+      <div class="muted">
+        <strong>Cite as</strong><br>
+        Éric Pouhier (2025). <em>COLS Sound Lab — Listening to Integers (v24)</em>. Zenodo. DOI: 10.5281/zenodo.17385769
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 10px 0">How to use</h2>
+      <div class="muted">
+        Open the HTML lab directly in a modern browser (desktop recommended). No internet connection or external resources required.
+        All analysis and synthesis happen locally.
+      </div>
+      <div class="sep"></div>
+      <div class="muted">License: <a href="https://creativecommons.org/licenses/by/4.0/" style="color:#93c5fd">CC BY 4.0</a></div>
+    </div>
+  </aside>
+</div>
+
+<footer>
+  © 2025 Éric Pouhier — COLS Project Series. COLS Sound Lab v24 — Listening to Integers.
+</footer>
+</body>
+</html>
