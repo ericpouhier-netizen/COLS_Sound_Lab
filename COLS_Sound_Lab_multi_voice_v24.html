@@ -1,0 +1,1133 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>COLS Sound Lab — Multi‑voice (p^e) • Dark • loop off • v24</title>
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --panel: #0f172a;
+    --ink: #e5e7eb;
+    --muted: #94a3b8;
+    --accent: #60a5fa;
+    --accent-2: #a78bfa;
+    --line: #1f2937;
+    --chip: #111827;
+    --chip-ink: #cbd5e1;
+    --ok: #22c55e;
+    --warn: #f59e0b;
+  }
+  body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+         margin: 24px; color: var(--ink); background: radial-gradient(1200px 800px at 20% -10%, #0d1328 0%, var(--bg) 60%); }
+  h1 { margin: 0 0 8px; letter-spacing: .3px; font-weight: 700; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; align-items: start; }
+  fieldset { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: linear-gradient(180deg, rgba(17,24,39,.85), rgba(15,23,42,.92)); box-shadow: 0 10px 40px rgba(0,0,0,.25) inset; }
+  legend { padding: 0 6px; font-weight: 700; color: var(--accent); }
+  label { display: block; font-size: 13px; color: var(--muted); margin-top: 6px; }
+  input, select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: #0b1221; color: #e5e7eb; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  button { padding: 10px 14px; border-radius: 10px; border: 1px solid var(--accent); background: linear-gradient(180deg, #1b3770, #162a54); color: #eaf2ff; cursor: pointer; }
+  button.secondary { background: linear-gradient(180deg, #2a2154, #211c44); border-color: var(--accent-2); color: #efeaff; }
+  button.ghost { background: #0b1221; border-color: var(--line); color: #94a3b8; }
+  button.warn { border-color: var(--warn); background: linear-gradient(180deg, #3a2d0a, #2b2208); color: #fde68a; }
+  button:disabled { opacity: .6; cursor: not-allowed; }
+  .muted { font-size: 12px; color: var(--muted); }
+  .out { white-space: pre-wrap; padding: 10px; background: #0b1221; border: 1px dashed var(--line); border-radius: 10px; color: #d1d5db; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:999px; background: var(--chip); color: var(--chip-ink); font-size:12px; margin-left:8px; border:1px solid var(--line); }
+  .pill { display:inline-block; padding:4px 10px; border-radius:999px; background: #102244; color:#cfe1ff; font-size:12px; margin-left:8px; border:1px solid #1b3a6e; }
+  .voices { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:8px; max-height: 240px; overflow:auto; padding:6px; background:#0b1221; border:1px solid var(--line); border-radius:10px; }
+  .voice-item { display:flex; gap:8px; align-items: start; font-size:13px; color:#c5d2e8; }
+  .voice-item input { flex: 0 0 auto; width:auto; }
+  .sl { display:flex; align-items:center; gap:10px; }
+  .sl output { min-width: 3ch; text-align:right; font-variant-numeric: tabular-nums; color:#cfe1ff; }
+  .section { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: linear-gradient(180deg, rgba(15,23,42,.82), rgba(10,18,34,.9)); }
+  footer { margin-top: 18px; padding: 10px 12px; border-top: 1px solid var(--line); color:#94a3b8; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  footer .cpy { color:#cbd5e1; }
+  footer .edit { font-size: 12px; color:#64748b; }
+  .cpy[contenteditable="true"] { outline: 1px dashed #334155; padding:2px 6px; border-radius:8px; }
+
+  @keyframes glow { 0%{box-shadow:0 0 0 rgba(96,165,250,0)} 50%{box-shadow:0 0 18px rgba(96,165,250,.6)} 100%{box-shadow:0 0 0 rgba(96,165,250,0)} }
+  .playing { animation: glow 1.2s ease-in-out infinite; border-color: var(--ok); background: linear-gradient(180deg, #1d3e65, #13233f); }
+  .spinner { width: 14px; height:14px; border:2px solid #93c5fd; border-top-color: transparent; border-radius:50%; display:inline-block; vertical-align:-2px; margin-right:8px; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .hint { font-size: 12px; color:#9fb3d8; margin-top:4px }
+  .result-card { border:1px solid var(--line); border-radius:10px; padding:8px; margin:6px 0; background:#0b1221; }
+
+/* Fix input widths and overflow to align with aggregator select */
+.grid .row label { min-width:0; }
+.grid label > input, .grid label > select { width:100%; max-width:100%; }
+
+/* Compact results list */
+#searchOut { white-space: normal; }
+.result-card { display:flex; align-items:center; gap:10px; padding:4px 6px; border-bottom:1px dashed var(--line); font-size:13px; line-height:1.25; }
+.result-card:last-child { border-bottom:0; }
+.result-card .ghost { margin-left:auto; }
+
+  /* Lateral compaction for results */
+  #searchOut { max-height: 320px; overflow:auto; padding-right:4px }
+  .result-line{ display:grid; grid-template-columns:max-content 1fr auto; column-gap:10px; align-items:center; 
+                font-size:13px; line-height:1.2; border:1px solid var(--line); background:#0c1530; border-radius:8px; padding:6px 8px; margin:4px 0 }
+  .result-line > .mono:nth-child(1){ white-space:nowrap }
+  .result-line > .mono:nth-child(2){ white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+  .result-line button{ padding:4px 8px }
+
+  /* v24: hide chord search UI (keep detected chord only) */
+  #btnSearchFromDetected { display:none !important; }
+  #inChord, #inChordVoices, #inSearchFrom, #inSearchTo, #inTol, #inFast,
+  #btnSearchChord, #btnCancelSearch, #searchProgressRow, #searchOut { display:none !important; }
+
+
+  .bigM{
+    position:fixed; top:10px; right:16px; z-index:9999;
+    font-weight:800; line-height:1; letter-spacing:.5px;
+    color:#e9fbff; text-shadow:0 2px 8px rgba(0,0,0,.6);
+    background:linear-gradient(180deg, rgba(0,68,102,.85), rgba(0,36,54,.85));
+    border:1px solid rgba(87,150,210,.5);
+    padding:8px 12px; border-radius:10px;
+    font-size: clamp(28px, 4vw, 68px);
+    pointer-events:none;
+  }
+  .notice{
+    background:#0d1b2a; color:#eaf6ff; border:1px solid #2a4157; border-left:4px solid #58b2ff;
+    padding:10px 12px; border-radius:8px; margin:12px 0; font-size:.95rem
+  }
+  .busy{ display:none; align-items:center; gap:8px; font-size:13px; color:#ffb3b3; }
+  .busy.on{ display:inline-flex; }
+  .busy .dot{ width:10px; height:10px; border-radius:50%; background:#ff3b3b; animation: blink 1s ease-in-out infinite; box-shadow:0 0 10px rgba(255,59,59,.6); }
+  @keyframes blink{ 0%{opacity:.25} 50%{opacity:1} 100%{opacity:.25} }
+
+</style>
+</head>
+<body>
+<div id="MOverlay" class="bigM">M = …</div>
+<h1>COLS Sound Lab — <span class="badge">multi‑voice (p<sup>e</sup>)</span> <span class="pill">Dark • loop off • v24</span></h1>
+<p class="muted">Tempo‑synchronised arpeggio by default. Multi‑voice from all prime‑power factors of <em>M</em>. Optional seamless loop. Length can be set by <b>time</b> or by <b>N cycles</b> of the dominant voice.</p>
+<div class="notice">For proper listening, use good <b>headphones</b> or a <b>capable sound system</b> — some notes are very low. You can transpose, but the transposed sound is no longer the true “voice” of the number.</div>
+<div class="section" style="margin-top:16px">
+  <h3 style="margin:6px 0 8px">Explanations — how to “hear” integers</h3>
+  <ol style="line-height:1.6">
+    <li><b>Factorisation.</b> We write <math><mi>M</mi><mo>=</mo><msubsup><mo>∏</mo><mi>i</mi><mrow><msub><mi>e</mi><mi>i</mi></msub></mrow></msubsup><msub><mi>p</mi><mi>i</mi></msub></math>. Each prime‑power <math><msup><mi>p</mi><mi>e</mi></msup></math> becomes one <em>voice</em>.</li>
+    <li><b>Geometric wave.</b> <math><mfrac><mi>A</mi><mrow><mo>π</mo><mo>/</mo><mn>2</mn></mrow></mfrac></math> is a normalised triangular wave on the class <math><mo>mod</mo><mi>M</mi></math> that modulates the audible energy.</li>
+    <li><b>Arithmetic windows.</b> For <math><mi>t</mi><mo>=</mo><mi>n</mi><mo>/</mo><mn>2</mn></math> we measure how close <math><msup><mi>a</mi><mi>t</mi></msup></math> is to <math>±1</math> modulo each <math><msup><mi>p</mi><mi>e</mi></msup></math>. The distance is <math><msub><mi>h</mi><mrow><msup><mi>p</mi><mi>e</mi></msup></mrow></msub></math>.</li>
+    <li><b>Per‑voice energy.</b> <math><msub><mi>E</mi><mi>i</mi></msub><mo>=</mo><mfrac><mi>A</mi><mrow><mo>π</mo><mo>/</mo><mn>2</mn></mrow></mfrac><mo>·</mo><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>h</mi><mrow><msup><mi>p</mi><mi>e</mi></msup></mrow></msub><mo>)</mo></math>. Peaks of <math><msub><mi>E</mi><mi>i</mi></msub></math> reveal audible structure.</li>
+    <li><b>Aggregators.</b> <math><msub><mi>E</mi><mi>min</mi></msub><mo>=</mo><mo>max</mo><mo>₍</mo><mi>i</mi><mo>₎</mo><msub><mi>E</mi><mi>i</mi></msub></math> (at least one factor resonates). <math><msub><mi>E</mi><mn>k=2</mn></msub></math> is the second‑largest among {<math><msub><mi>E</mi><mi>i</mi></msub></math>} to emphasise coincidences.</li>
+    <li><b>Periods → frequencies.</b> We estimate each voice period on the <b>arithmetic signal</b> <math><msub><mi>S</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn><mo>−</mo><msub><mi>h</mi><mrow><msup><mi>p</mi><mi>e</mi></msup></mrow></msub></math>, then map <math><msub><mi>f</mi><mi>i</mi></msub><mo>=</mo><mfrac><mi>K</mi><msub><mi>T</mi><mi>i</mi></msub></mfrac></math> (Auto/A/B scales), with transpose <math>α</math> and octave factor <math>×2^<mi>oct</mi></math>.</li>
+    <li><b>Render.</b> <em>Chord</em>: all voices at once. <em>Arpeggio</em>: voices one after another. <em>Tempo‑sync</em>: step derived from the envelope autocorrelation.</li>
+    <li><b>Seamless looping.</b> Continuous oscillator phase, buffer length as an integer multiple of the step (for arpeggio), Hann micro‑fade per step, and short end→start crossfade.</li>
+  </ol>
+</div>
+
+
+
+
+<div class="grid">
+  <fieldset>
+    <legend>Input & analysis</legend>
+    <label>M (e.g., 360, 840, 2310, 14141) <input id="inM" type="number" value="1001" min="2"></label>
+    <div class="row">
+      <label style="flex:1">Base a <input id="ina" type="number" value="2" min="2"></label>
+      <label style="flex:1">Window (×M) <input id="inWF" type="number" value="4" min="1" step="1"></label>
+    </div>
+    <label>Envelope aggregator
+      <select id="inAgg">
+        <option value="min" selected>E_min (at least one factor)</option>
+        <option value="k2">E_k (k=2, at least two factors)</option>
+      </select>
+    </label>
+    <div class="row">
+      <button id="btnAnalyze" class="secondary">Analyse & list voices</button> <span id="busyAnalyze" class="busy" aria-live="polite"><span class="dot"></span> Please&nbsp;wait…</span>
+    </div>
+    <div id="colsOut" class="out"></div>
+    <p class="muted" style="margin-top:6px">
+      <b>Why these inputs?</b> We automatically factorise <em>M</em>, but we still need: (i) <b>M</b> (the number to “listen”),
+      (ii) the <b>base a</b> (drives the arithmetic distance to ±1 mod p<sup>e</sup>), (iii) the <b>window length</b> (how many samples to analyse to estimate periods robustly),
+      and (iv) the <b>envelope aggregator</b> (how multiple factors combine in amplitude).
+    </p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Voices (p<sup>e</sup>)</legend>
+    <div class="sl"><label>How many voices to play</label>
+      <input id="voiceCount" type="range" min="1" max="1" step="1" value="1" oninput="voicesOut.value=this.value; updateChordInference();">
+      <output id="voicesOut">1</output>
+    </div>
+
+    <div class="row" style="margin:6px 0">
+      <button class="ghost" id="selAll">All</button>
+      <button class="ghost" id="selNone">None</button>
+      <button class="ghost" id="selInvert">Invert</button>
+      <button class="ghost" id="selTopN">Top‑N</button>
+    </div>
+
+    <div class="row">
+      <div style="flex:1">
+        <label>Checklist</label>
+        <div id="voiceList" class="voices"></div>
+      </div>
+      <div style="flex:1">
+        <label>Multi‑select</label>
+        <select id="voiceSelect" size="8" multiple style="height:240px"></select>
+        <div class="muted">Tip: Ctrl/Cmd + click for multiple selection.</div>
+      </div>
+    </div>
+
+    <div class="muted">If nothing is selected, the <b>N</b> strongest voices (slider) will play. If you select any, we play <b>exactly</b> your selection (capped to N).</div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Mapping & render</legend>
+    <div class="row">
+      <label style="flex:1">Transpose (×) <input id="inAlpha" type="number" value="1.0" step="0.01" oninput="refreshFreqLabels(); updateChordInference();"></label>
+      <div class="sl" style="flex:1"><label>Octave (−4..+4)</label>
+        <input id="inOct" type="range" min="-4" max="4" step="1" value="0" oninput="octOut.value=this.value;refreshFreqLabels(); updateChordInference();">
+        <output id="octOut">0</output>
+      </div>
+    </div>
+    <div class="row">
+      <label style="flex:1">Quantise to 12‑TET
+        <select id="inQuant" onchange="refreshFreqLabels(); updateChordInference();">
+          <option value="yes">Yes</option>
+          <option value="no" selected>No</option>
+        </select>
+      </label>
+      <label style="flex:1">K scale
+        <select id="inKmode" onchange="refreshFreqLabels(); updateChordInference();">
+          <option value="auto" selected>Auto (2640 if T ≤ 40, else 17600)</option>
+          <option value="A">Scale A (K=2640)</option>
+          <option value="B">Scale B (K=17600)</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="row">
+      <div style="flex:1">
+        <label>Length mode
+          <select id="inLenMode">
+            <option value="cycles">Cycles</option>
+            <option value="time" selected>Time (seconds)</option>
+          </select>
+        </label>
+      </div>
+      <div style="flex:1; display:none" id="cyclesWrap">
+        <label>Cycles (N) <input id="inCycles" type="number" value="4" min="1" step="1"></label>
+        <div class="muted" id="refVoiceOut">Reference voice: (auto)</div>
+      </div>
+      <div style="flex:1" id="timeWrap">
+        <label>Duration (s) <input id="inDur" type="number" value="8" min="1" step="0.5"></label>
+      </div>
+    </div>
+
+    <div class="row">
+      <label style="flex:1">Waveform
+        <select id="inWave">
+          <option value="sine" selected>Sine</option>
+          <option value="triangle">Triangle</option>
+          <option value="saw">Sawtooth</option>
+        </select>
+      </label>
+      <label style="flex:1">Play mode
+        <select id="inMode">
+          <option value="chord">Chord (simultaneous)</option>
+          <option value="arp">Arpeggio (alternating)</option>
+          <option value="tempo" selected>Arpeggio tempo‑sync</option>
+        </select>
+      </label>
+    </div>
+    <div class="row">
+      <label><input id="inLoop" type="checkbox"> Continuous loop</label>
+    </div>
+    <div class="row">
+      <button id="btnPlay"><span id="playIcon">▶︎</span> <span id="playText">Play</span></button>
+      <button id="btnStop" class="ghost">■ Stop</button>
+      <button id="btnExport" class="secondary">⬇︎ Export WAV</button>
+    </div>
+    <div id="playOut" class="out"></div>
+  </fieldset>
+</div>
+
+<div class="grid" style="margin-top:8px">
+  <fieldset>
+    <legend>Chord tools</legend>
+
+    <h4 style="margin:4px 0 6px">Detected chord (from current number & selection)</h4>
+    <div class="row" style="margin-top:4px"><button id="btnSearchFromDetected" class="ghost">Search numbers for this chord</button></div>
+    <div id="chordOut" class="out">—</div>
+
+    <h4 style="margin:10px 0 6px">Find a number for this chord</h4>
+    <div class="row">
+      <label style="flex:1">Chord (e.g., Cm7, D#maj7, Gsus4, A5) <input id="inChord" value="C"/></label>
+      <label style="flex:0.6">Voices k <input id="inChordVoices" type="number" value="3" min="1" max="6"/></label>
+    </div>
+    <div class="row">
+      <label style="flex:0.6">Search M from <input id="inSearchFrom" type="number" value="2" min="2"/></label>
+      <label style="flex:0.6">to <input id="inSearchTo" type="number" value="5000" min="3"/></label>
+      <label style="flex:0.6">Tolerance (cents) <input id="inTol" type="number" value="55" min="5" max="100" step="1"/></label>
+      <label style="flex:0.6"><input id="inFast" type="checkbox" checked/> Fast scan (window ×M = 1)</label>
+    </div>
+    <div class="row">
+      <button id="btnSearchChord" class="secondary">Search</button>
+      <button id="btnCancelSearch" class="warn" disabled>Cancel</button>
+    </div>
+    
+    <div class="row" id="searchProgressRow">
+      <progress id="searchProg" value="0" max="100" style="flex:1; width:100%"></progress>
+      <span id="searchPct" class="muted" style="margin-left:8px;min-width:40px">0%</span>
+      <span id="searchStat" class="muted" style="margin-left:8px; min-width:120px">Idle.</span>
+    </div>
+<div id="searchOut" class="out">Results will appear here.</div>
+  </fieldset>
+</div>
+
+<footer>
+  <span class="cpy" id="cpy" contenteditable="true">© 2025 COLS — Eric POUHIER. All rights reserved.</span>
+  <span class="edit">(click to edit — stored locally)</span>
+</footer>
+
+<script>
+const $ = (id)=>document.getElementById(id);
+function uiMsg(id, txt){ $(id).textContent = txt; }
+function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
+
+// ---------- Numbers: primality + Pollard‑Rho ----------
+function modMul(a,b,m){ return (a*b) % m; }
+function modPow(a,e,m){ a%=m; let r=1n; while(e>0n){ if(e&1n) r=(r*a)%m; a=(a*a)%m; e>>=1n; } return r; }
+function isProbablePrime(n){
+  if(n<2n) return false;
+  const small=[2n,3n,5n,7n,11n,13n,17n,19n,23n,29n,31n,37n];
+  for(const p of small){ if(n===p) return true; if(n%p===0n) return n===p; }
+  let d=n-1n, s=0n; while((d&1n)===0n){ d>>=1n; s++; }
+  function check(a){
+    if(a % n === 0n) return true;
+    let x=modPow(a,d,n);
+    if(x===1n || x===n-1n) return true;
+    for(let i=1n;i<s;i++){ x=modMul(x,x,n); if(x===n-1n) return true; }
+    return false;
+  }
+  const bases=[2n,325n,9375n,28178n,450775n,9780504n,1795265022n];
+  for(const a of bases){ if(!check(a)) return false; }
+  return true;
+}
+function gcd(a,b){ while(b){ const t=a%b; a=b; b=t; } return a; }
+function randBetween(min,max){ const diff=max-min; let x=BigInt(Math.floor(Math.random()*Number(diff))) % diff; return min + x; }
+function pollardRho(n){
+  if(n%2n===0n) return 2n;
+  while(true){
+    let c = randBetween(1n, n-1n);
+    let x = randBetween(2n, n-2n);
+    let y = x, d=1n;
+    const f=(v)=> (modMul(v,v,n)+c)%n;
+    while(d===1n){ x=f(x); y=f(f(y)); d=gcd((x>y)?x-y:y-x, n); }
+    if(d!==n) return d;
+  }
+}
+function factorBig(n, arr){
+  if(n===1n) return;
+  if(isProbablePrime(n)){ arr.push(n); return; }
+  const d = pollardRho(n);
+  factorBig(d, arr); factorBig(n/d, arr);
+}
+function factorPrimePowers(N){
+  const arr=[]; factorBig(N, arr); arr.sort((a,b)=> (a<b?-1:1));
+  const out=[];
+  for(let i=0;i<arr.length;){
+    const p=arr[i]; let e=1; i++;
+    while(i<arr.length && arr[i]===p){ e++; i++; }
+    let r=1n; for(let k=0;k<e;k++) r*=p;
+    out.push({p:p, e:e, r:r});
+  }
+  return out;
+}
+
+// ---------- COLS: E_i, S_i and aggregators ----------
+function A_over_90(n,M){ return Math.asin(Math.abs(Math.sin(Math.PI * ((n%M)/M)))) / (Math.PI/2); }
+function distBig(x,r){ x=(x%r + r)%r; const y=r-x; return (x<y)? x:y; }
+function h_r_big(t,r,a){
+  const v=modPow(BigInt(a), BigInt(t), r);
+  const d1=distBig(v-1n, r), dm1=distBig(v-(r-1n), r);
+  const d=(d1<dm1)? d1: dm1;
+  return Number(d)/Number(r);
+}
+function buildAllE(M,a,wf,primePowers){
+  const Ns=[], A90=[]; for(let n=0;n<wf*M;n+=2){ Ns.push(n); A90.push(A_over_90(n,M)); }
+  const Ei=[], Sa=[];
+  for(const obj of primePowers){
+    const r=obj.r;
+    const e=new Float64Array(Ns.length);
+    const s=new Float64Array(Ns.length);
+    for(let i=0;i<Ns.length;i++){
+      const t=Math.floor(Ns[i]/2);
+      const h=h_r_big(t, r, a);
+      s[i]= 1.0 - h;              // arithmetic signal
+      e[i]= A90[i] * s[i];        // energy with geometry
+    }
+    Ei.push(e); Sa.push(s);
+  }
+  const Emin=new Float64Array(Ns.length);
+  const Ek2 =new Float64Array(Ns.length);
+  for(let i=0;i<Ns.length;i++){
+    let max1=-1, max2=-1;
+    for(const e of Ei){
+      const v=e[i];
+      if(v>max1){ max2=max1; max1=v; } else if(v>max2){ max2=v; }
+    }
+    Emin[i]=(max1<0)?0:max1;
+    Ek2[i]=(max2<0)?0:max2;
+  }
+  return {Ns, A90, Ei, Sa, Emin, Ek2};
+}
+
+// ---------- Period estimation (fundamental-first) ----------
+function estimateT_from_S_fundamental(Ns, S, Tmin=2, Tmax=400){
+  const N = Ns.length;
+  Tmax = Math.min(Tmax, Math.max(Tmin+1, N-2));
+  const Y = new Float64Array(N);
+  let mean=0; for(let i=0;i<N;i++){ Y[i]=S[i]; mean+=Y[i]; } mean/=N;
+  let varr=0; for(let i=0;i<N;i++){ Y[i]-=mean; varr += Y[i]*Y[i]; }
+  if(varr < 1e-12){ return {T:Math.max(2,Tmin), power:0}; }
+
+  let bestT=Tmin, bestP=-1;
+  for(let T=Tmin; T<=Tmax; T++){
+    const w=2*Math.PI/T; let c=0,s=0;
+    for(let i=0;i<N;i++){ const ang=w*Ns[i]; c+=Y[i]*Math.cos(ang); s+=Y[i]*Math.sin(ang); }
+    const P=c*c+s*s; if(P>bestP){ bestP=P; bestT=T; }
+  }
+
+  const acf = new Float64Array(Tmax+1);
+  let maxA=-1, argMax=Tmin;
+  for(let T=Tmin; T<=Tmax; T++){
+    let sum=0; const L=N-T;
+    for(let i=0;i<L;i++) sum += Y[i]*Y[i+T];
+    acf[T]=sum; if(sum>maxA){ maxA=sum; argMax=T; }
+  }
+  let firstSig = argMax;
+  const thr = 0.6 * maxA;
+  for(let T=Tmin+1; T<Math.min(Tmax, argMax+1); T++){
+    const left = acf[T-1], mid=acf[T], right=acf[T+1];
+    if(mid>=left && mid>=right && mid>=thr){ firstSig=T; break; }
+  }
+  let chosenT = bestT;
+  if(firstSig % bestT === 0 && firstSig >= 2*bestT){
+    chosenT = firstSig;
+  } else if(argMax % bestT === 0 && argMax >= 2*bestT){
+    chosenT = argMax;
+  }
+  return {T:chosenT, power:bestP};
+}
+
+// ---------- Mapping & notes ----------
+function mapTtoF(T,Kmode){
+  let K=2640; if(Kmode==='auto') K=(T<=40)?2640:17600; else if(Kmode==='A') K=2640; else if(Kmode==='B') K=17600;
+  return K/T;
+}
+function quantize12TET(f){ if(f<=0) return f; const n=Math.round(12*Math.log2(f/440)); return 440*Math.pow(2, n/12); }
+const NOTE_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+function noteLabel(f, quant){
+  if(!(f>0)) return "";
+  const midi = Math.round(69 + 12*Math.log2(f/440));
+  const note = NOTE_NAMES[(midi%12+12)%12] + (Math.floor(midi/12)-1);
+  const fq = 440*Math.pow(2,(midi-69)/12);
+  if(quant) return note;
+  const cents = Math.round(1200*Math.log2(f/fq));
+  return note + (Math.abs(cents)>=1 ? (cents>0? ` +${cents}¢`:` ${cents}¢`) : "");
+}
+function midiFromFreq(f){
+  return Math.round(69 + 12*Math.log2(f/440));
+}
+function pcFromFreq(f){
+  const m = midiFromFreq(f);
+  return ((m%12)+12)%12;
+}
+
+// Envelope & tempo
+function makeEnvelopeFromE(E,N,floor=0.06,power=1.0){
+  const e=new Float64Array(E.length); let mn=1e9, mx=-1e9;
+  for(let i=0;i<E.length;i++){ e[i]=E[i]; if(e[i]<mn) mn=e[i]; if(e[i]>mx) mx=e[i]; }
+  for(let i=0;i<e.length;i++){ e[i]=(mx>mn)? (e[i]-mn)/(mx-mn):0.0; e[i]=Math.pow(e[i],power); }
+  const out=new Float32Array(N);
+  for(let i=0;i<N;i++){
+    const pos=(i/(N-1))*(e.length-1); const k=Math.floor(pos), h=pos-k;
+    const v=(k+1<e.length)? (e[k]*(1-h)+e[k+1]*h) : e[e.length-1];
+    out[i]=Math.max(0, Math.min(1, floor+(1-floor)*v));
+  }
+  return out;
+}
+function dominantStepSecondsFromEnv(env, duration){
+  const ds=256, nd=Math.floor(env.length/ds); const x=new Float64Array(nd);
+  let mean=0; for(let i=0;i<nd;i++){ x[i]=env[i*ds]; mean+=x[i]; } mean/=nd; for(let i=0;i<nd;i++) x[i]-=mean;
+  const acf=new Float64Array(nd);
+  for(let lag=0; lag<nd; lag++){ let s=0; for(let i=0;i<nd-lag;i++) s+= x[i]*x[i+lag]; acf[lag]=s; }
+  const minS=0.12, maxS=0.8;
+  const minLag=Math.max(1, Math.floor(minS*nd/duration)), maxLag=Math.min(nd-1, Math.floor(maxS*nd/duration));
+  let bestLag=minLag, bestVal=-1e9;
+  for(let lag=minLag; lag<=maxLag; lag++){ if(acf[lag]>bestVal){ bestVal=acf[lag]; bestLag=lag; } }
+  let step=(bestLag/nd)*duration; if(!(step>0)) step=0.25; return clamp(step, minS, maxS);
+}
+
+// Loop smoothing (incl. arpeggio)
+function removeDC(samples){ let mean=0; for(let i=0;i<samples.length;i++) mean+=samples[i]; mean/=samples.length; for(let i=0;i<samples.length;i++) samples[i]-=mean; }
+function crossfadeEndsNoRotate(samples, L){
+  const N = samples.length;
+  L = Math.max(1, Math.min(L|0, Math.floor(N/2)));
+  const out = samples.slice(0);
+  for(let k=0;k<L;k++){
+    const a=Math.sin(0.5*Math.PI*(k/L)), b=Math.cos(0.5*Math.PI*(k/L));
+    out[k] = a*a*out[k] + b*b*out[N-L+k];
+  }
+  let taper = Math.floor(0.006*44100);
+  taper = Math.max(1, Math.min(taper, Math.floor(N/2)));
+  for(let i=0;i<taper;i++){
+    const w=0.5*(1-Math.cos(Math.PI*i/taper));
+    out[i]*=w; out[N-1-i]*=w;
+  }
+  return out;
+}
+
+// Synthesis
+function oscSample(wf, ph){ const x=ph%(2*Math.PI);
+  if(wf==='sine') return Math.sin(x);
+  if(wf==='triangle') return (2/Math.PI)*Math.asin(Math.sin(x));
+  if(wf==='saw'){ const frac=(x/(2*Math.PI)); return 2*(frac - Math.floor(frac+0.5)); }
+  return Math.sin(x);
+}
+function synthSignal(opts){
+  const SR=44100, tp=2*Math.PI;
+  let N=Math.floor(SR*opts.duration);
+  let env=opts.env;
+
+  if(opts.mode==='chord'){
+    const out=new Float32Array(N);
+    for(const f of opts.freqs){ let ph=0, dt=1/SR; for(let i=0;i<N;i++){ ph+=tp*f*dt; out[i]+=oscSample(opts.waveform, ph); } }
+    const K=Math.max(1,opts.freqs.length); for(let i=0;i<N;i++){ out[i]=(out[i]/K)*env[i]; }
+    removeDC(out);
+    const L=Math.max(8, Math.min(Math.floor(0.04*SR), Math.floor(N/6)));
+    let out2=crossfadeEndsNoRotate(out, L);
+    let peak=1e-9; for(let i=0;i<out2.length;i++){ const a=Math.abs(out2[i]); if(a>peak) peak=a; } const g=0.6/peak; for(let i=0;i<N;i++) out2[i]*=g;
+    return out2;
+  } else {
+    const step = (opts.mode==='tempo')? (opts.step||0.25):0.25;
+    const stepN = Math.max(1, Math.floor(step*SR));
+    const Nsteps = Math.max(1, Math.floor(N/stepN));
+    N = Nsteps*stepN;
+    const out=new Float32Array(N);
+    if(env.length!==N){
+      const e2=new Float32Array(N);
+      for(let i=0;i<N;i++){ const pos=i*(env.length-1)/(N-1); const k=Math.floor(pos), h=pos-k; e2[i]=(k+1<env.length)? env[k]*(1-h)+env[k+1]*h : env[env.length-1]; }
+      env=e2;
+    }
+    let ph=0, dt=1/SR;
+    const TE = Math.min(Math.floor(0.012*SR), Math.floor(stepN/3));
+    for(let s=0; s<N; s++){
+      const j = Math.floor(s/stepN);
+      const f = opts.freqs[j % opts.freqs.length];
+      ph += tp*f*dt;
+      let amp = 1.0;
+      const k = s - j*stepN;
+      if(TE>2){
+        if(k<TE){ const w = 0.5*(1 - Math.cos(Math.PI * (k/TE))); amp *= w; }
+        if(stepN-1-k < TE){ const w = 0.5*(1 - Math.cos(Math.PI * ((stepN-1-k)/TE))); amp *= w; }
+      }
+      out[s] += amp * oscSample(opts.waveform, ph);
+    }
+    for(let i=0;i<N;i++) out[i]*=env[i];
+    removeDC(out);
+    const L = Math.min(Math.floor(0.4*stepN), Math.floor(0.06*SR));
+    let out2 = crossfadeEndsNoRotate(out, Math.max(8, L));
+    let peak=1e-9; for(let i=0;i<out2.length;i++){ const a=Math.abs(out2[i]); if(a>peak) peak=a; } const g=0.6/peak; for(let i=0;i<N;i++) out2[i]*=g;
+    return out2;
+  }
+}
+function encodeWAV(samples){
+  const N=samples.length, header=44, size=header+N*2; const buf=new ArrayBuffer(size), view=new DataView(buf);
+  function w32(o,v){ view.setUint32(o,v,true);} function w16(o,v){ view.setUint16(o,v,true);}
+  w32(0,0x46464952); w32(4,size-8); w32(8,0x45564157);
+  w32(12,0x20746d66); w32(16,16); w16(20,1); w16(22,1); w32(24,44100); w32(28,44100*2); w16(32,2); w16(34,16);
+  w32(36,0x61746164); w32(40,N*2);
+  let off=44; for(let i=0;i<N;i++){ let s=Math.max(-1,Math.min(1,samples[i])); s = s<0 ? s*0x8000 : s*0x7FFF; view.setInt16(off,s,true); off+=2; }
+  return new Blob([view], {type:'audio/wav'});
+}
+
+// Playback (with animated UI state)
+let lastSamples=null, lastNode=null, lastCtx=null, isPlaying=false;
+function setPlayUI(state){
+  isPlaying = state;
+  const btn = $('btnPlay'); const icon=$('playIcon'); const txt=$('playText'); const stop=$('btnStop');
+  if(state){
+    btn.classList.add('playing'); btn.disabled=true;
+    icon.className = 'spinner'; txt.textContent = 'Playing…';
+    stop.disabled=false;
+  }else{
+    btn.classList.remove('playing'); btn.disabled=false;
+    icon.className=''; icon.textContent='▶︎'; txt.textContent='Play';
+  }
+}
+function stopPlayback(){
+  if(lastNode){ try{ lastNode.stop(); }catch(e){} lastNode=null; }
+  if(lastCtx){ try{ lastCtx.close(); }catch(e){} lastCtx=null; }
+  setPlayUI(false);
+}
+async function playSamples(samples, loop){
+  stopPlayback();
+  const ctx = new (window.AudioContext||window.webkitAudioContext)();
+  if(ctx.state==='suspended'){ try{ await ctx.resume(); }catch(e){} }
+  const buf=ctx.createBuffer(1, samples.length, 44100); buf.copyToChannel(samples,0);
+  const src=ctx.createBufferSource(); src.buffer=buf; src.loop=!!loop; src.connect(ctx.destination);
+  src.onended = ()=>{ setPlayUI(false); };
+  src.start();
+  lastCtx=ctx; lastNode=src;
+  setPlayUI(true);
+}
+
+// State
+let candidates=[]; let Ns=[], A90=[], Ei=[], Si=[], Eagg=[];
+
+function currentMapping(){
+  const Kmode = $('inKmode').value;
+  const alpha = parseFloat($('inAlpha').value);
+  const oct    = parseInt($('inOct').value,10);
+  const octMul = Math.pow(2, oct);
+  const quant  = ($('inQuant').value==='yes');
+  return {Kmode, alpha, octMul, quant};
+}
+function computeFreqFromT(T, map){
+  let f = mapTtoF(T, map.Kmode) * map.alpha * map.octMul;
+  if(map.quant) f = quantize12TET(f);
+  return f;
+}
+function refreshFreqLabels(){
+  if(!candidates.length) return;
+  const map = currentMapping();
+  const prog=$('searchProg'); if(prog){ prog.max = Mto - Mfrom + 1; prog.value = 0; }
+  const stat=$('searchStat'); if(stat){ stat.textContent = 'Starting…'; }
+
+  const cont = $('voiceList');
+  const items = cont.querySelectorAll('.voice-item');
+  for(let i=0;i<candidates.length;i++){
+    const c=candidates[i];
+    const f = computeFreqFromT(c.T, map);
+    c.f = f;
+    const note = noteLabel(f, map.quant);
+    const lab = items[i].querySelector('label');
+    if(lab) lab.innerHTML = `<b>${c.label}</b> — T≈${c.T} | f≈${f.toFixed(1)} Hz | note: ${note} | P=${c.power.toFixed(1)}`;
+  }
+  const sel = $('voiceSelect');
+  for(let i=0;i<sel.options.length;i++){
+    const c = candidates[i];
+    const note = noteLabel(c.f || computeFreqFromT(c.T, map), map.quant);
+    sel.options[i].textContent = `${c.plainLabel} — T≈${c.T} | f≈${(c.f||0).toFixed(1)} Hz | note: ${note} | P=${c.power.toFixed(1)}`;
+  }
+}
+
+// Build lists
+function rebuildVoiceList(){
+  const cont = $('voiceList'); cont.innerHTML='';
+  const sel = $('voiceSelect'); sel.innerHTML='';
+  const maxVoices = Math.min(8, candidates.length);
+  $('voiceCount').max = String(Math.max(1, maxVoices));
+  $('voiceCount').value = String(Math.max(1, maxVoices));
+  $('voicesOut').value = $('voiceCount').value;
+
+  const map = currentMapping();
+  candidates.forEach((c, i)=>{
+    c.f = computeFreqFromT(c.T, map);
+    const id = 'vchk_'+i;
+    const div = document.createElement('div'); div.className='voice-item';
+    const cb = document.createElement('input'); cb.type='checkbox'; cb.id=id; cb.className='voiceChk'; cb.checked = !!c.checked;
+    const lab = document.createElement('label'); lab.htmlFor=id;
+    const note = noteLabel(c.f, map.quant);
+    lab.innerHTML = `<b>${c.label}</b> — T≈${c.T} | f≈${c.f.toFixed(1)} Hz | note: ${note} | P=${c.power.toFixed(1)}`;
+    div.appendChild(cb); div.appendChild(lab);
+    cont.appendChild(div);
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = `${c.plainLabel} — T≈${c.T} | f≈${c.f.toFixed(1)} Hz | note: ${note} | P=${c.power.toFixed(1)}`;
+    opt.selected = !!c.checked;
+    sel.appendChild(opt);
+    cb.addEventListener('change', ()=>{ opt.selected = cb.checked; updateChordInference(); });
+  });
+  $('voiceSelect').onchange = ()=>{
+    const cbx = document.querySelectorAll('.voiceChk');
+    const sel = $('voiceSelect');
+    for(let i=0;i<cbx.length;i++){ cbx[i].checked = sel.options[i].selected; }
+    updateChordInference();
+  };
+}
+
+// Helper: gather picks
+function gatherPicks(){
+  const Nwant = parseInt($('voiceCount').value,10);
+  const cbx = document.querySelectorAll('.voiceChk');
+  const sel = $('voiceSelect');
+  let chosenIdx = new Set();
+  for(let i=0;i<cbx.length;i++){ if(cbx[i].checked) chosenIdx.add(i); }
+  for(let i=0;i<sel.options.length;i++){ if(sel.options[i].selected) chosenIdx.add(i); }
+  let picks = Array.from(chosenIdx).map(i=>candidates[i]);
+
+  if(picks.length===0){
+    picks = candidates.slice().sort((a,b)=> b.power-a.power).slice(0, Nwant);
+  }else{
+    if(picks.length>Nwant){
+      picks = picks.sort((a,b)=> b.power-a.power).slice(0, Nwant);
+    }
+  }
+  picks.sort((a,b)=> b.power-a.power);
+  return picks;
+}
+
+// Length mode
+function computeDurationFromCycles(freqs, picks){
+  const Ncycles = Math.max(1, parseInt($('inCycles').value,10)||4);
+  let refFreq = null, refLabel='(auto)';
+  if(picks.length>0){
+    refFreq = computeFreqFromT(picks[0].T, currentMapping());
+    refLabel = picks[0].plainLabel + ` (≈${refFreq.toFixed(2)} Hz)`;
+  }else if(candidates.length>0){
+    refFreq = computeFreqFromT(candidates[0].T, currentMapping());
+    refLabel = candidates[0].plainLabel + ` (≈${refFreq.toFixed(2)} Hz)`;
+  }else{
+    refFreq = 220; refLabel = 'default (220 Hz)';
+  }
+  $('refVoiceOut').textContent = `Reference voice: ${refLabel}`;
+  let dur = Ncycles / Math.max(1e-6, refFreq);
+  return dur;
+}
+
+// ---------- Chord tools ----------
+const CHORD_TEMPLATES = {
+  "maj":[0,4,7],
+  "min":[0,3,7],
+  "5":[0,7],
+  "sus2":[0,2,7],
+  "sus4":[0,5,7],
+  "dim":[0,3,6],
+  "aug":[0,4,8],
+  "6":[0,4,7,9],
+  "m6":[0,3,7,9],
+  "7":[0,4,7,10],
+  "maj7":[0,4,7,11],
+  "m7":[0,3,7,10],
+  "mMaj7":[0,3,7,11]
+};
+function parseChordSymbol(sym){
+  // Returns {rootPC, quality, pcs} or null
+  const m = sym.trim().match(/^([A-Ga-g])([#b♯♭]?)(.*)$/);
+  if(!m) return null;
+  const letter = m[1].toUpperCase();
+  const acc = m[2].replace('♯','#').replace('♭','b');
+  const tail = m[3].trim().toLowerCase();
+  const basePCMap = {C:0, D:2, E:4, F:5, G:7, A:9, B:11};
+  let root = basePCMap[letter];
+  if(acc==='#') root=(root+1)%12; else if(acc==='b') root=(root+11)%12;
+  // Quality detection
+  let q = "maj";
+  if(tail==="" || tail==="maj" || tail==="M") q="maj";
+  else if(/^m(?!aj)/.test(tail) || tail==="min" || tail==="−") q="min";
+  if(/maj7|Δ|M7/.test(tail)) q="maj7";
+  else if(/m7|min7|−7/.test(tail)) q="m7";
+  else if(/7/.test(tail) && !/maj7/.test(tail)) q="7";
+  if(/sus2/.test(tail)) q="sus2";
+  if(/sus4/.test(tail)) q="sus4";
+  if(/dim|°/.test(tail)) q="dim";
+  if(/aug|\+/.test(tail)) q="aug";
+  if(/mmaj7/.test(tail)) q="mMaj7";
+  if(/m6/.test(tail)) q="m6";
+  if(/6/.test(tail) && !/m6/.test(tail)) q="6";
+  if(/(^|[^a-z])5($|[^a-z])/.test(tail)) q="5";
+  const intervals = CHORD_TEMPLATES[q] || CHORD_TEMPLATES["maj"];
+  const pcs = new Set(intervals.map(x=> (root + x)%12));
+  return {rootPC:root, quality:q, pcs:pcs};
+}
+function chordNameFrom(rootPC, quality){
+  const note = NOTE_NAMES[rootPC];
+  const mapQ = {maj:"", min:"m", "5":"5", sus2:"sus2", sus4:"sus4", dim:"dim", aug:"aug",
+                "6":"6", m6:"m6", "7":"7", maj7:"maj7", m7:"m7", mMaj7:"mMaj7"};
+  const q = mapQ[quality] ?? quality;
+  return note + (q? q:"");
+}
+function chordDetectFromPCs(pcs){
+  // Try every root and quality, return best few
+  let best=null; let alts=[];
+  for(const [q,ints] of Object.entries(CHORD_TEMPLATES)){
+    for(let r=0;r<12;r++){
+      const tpl = new Set(ints.map(x=>(r+x)%12));
+      let hits=0, extras=0;
+      for(const p of pcs){ if(tpl.has(p)) hits++; else extras++; }
+      const coverage = hits / tpl.size;
+      const penalty = extras / Math.max(1, pcs.size);
+      const score = coverage - 0.35*penalty;
+      const name = chordNameFrom(r,q);
+      const obj = {name, score, coverage, extras, root:r, quality:q};
+      if(!best || score>best.score) best=obj;
+      alts.push(obj);
+    }
+  }
+  alts.sort((a,b)=> b.score-a.score);
+  return {best, alts:alts.slice(1,5)};
+}
+function updateChordInference(){
+  try{
+    if(!candidates.length){ uiMsg('chordOut','—'); return; }
+    const map = currentMapping();
+    const picks = gatherPicks();
+    if(picks.length===0){ uiMsg('chordOut','—'); return; }
+    let freqs = picks.map(c=> computeFreqFromT(c.T, map));
+    // If loaded from chord search, prefer the exact freqs used for scoring (to keep chord consistent)
+    if(__override){
+      try{
+        const sigNow = JSON.stringify({quant: map.quant, Kmode: map.Kmode, K: map.K, alpha: map.alpha, oct: map.oct});
+        const allPresent = picks.every(p=> __override.freqByR && (__override.freqByR[String(p.r)]!==undefined));
+        if(__override.sig===sigNow && allPresent){
+          freqs = picks.map(p=> __override.freqByR[String(p.r)]);
+        }else{
+          // mapping changed or selection differs: drop override
+          __override = null;
+        }
+      }catch(e){ __override = null; }
+    }
+    const pcs = new Set(freqs.map(pcFromFreq));
+    const notes = freqs.map(f=> noteLabel(f, map.quant)).join(', ');
+    const det = chordDetectFromPCs(pcs);
+    const best = det.best;
+    window.detectedChordSymbol = best.name;
+    const altTxt = det.alts.map(o=> `${o.name} (${(o.score*100|0)}%)`).join('  ·  ');
+    uiMsg('chordOut', `Notes: ${notes}\nDetected chord: ${best.name}  (score ${(best.score*100).toFixed(0)}%)\nAlternatives: ${altTxt}`);
+  }catch(e){ uiMsg('chordOut', 'Chord detection error.'); }
+}
+
+// ---------- Chord search over M ----------
+let searchCancel=false;
+function scoreAgainstTargetChord(freqs, target){
+  const pcs = new Set(freqs.map(pcFromFreq));
+  let hits=0; for(const p of pcs){ if(target.pcs.has(p)) hits++; }
+  const coverage = hits / target.pcs.size;
+  const extras = Math.max(0, pcs.size - hits);
+  const penalty = extras / Math.max(1, pcs.size);
+  const score = coverage - 0.35*penalty;
+  return {score, coverage, extras, pcs};
+}
+
+let __pendingSelectRs = null; // prime-power r values to force-select after analysis
+let __override = null; // {freqByR: {...}, sig: 'mapping signature'}
+ // prime-power r values to force-select after analysis
+
+function loadMWithPicks(m, rsJson, freqsJson){
+  try{
+    __pendingSelectRs = Array.isArray(rsJson) ? rsJson : JSON.parse(rsJson);
+  }catch(e){ __pendingSelectRs = null; }
+  try{
+    const rsArr = Array.isArray(rsJson) ? rsJson : JSON.parse(rsJson);
+    const fqArr = Array.isArray(freqsJson) ? freqsJson : JSON.parse(freqsJson);
+    const map = currentMapping();
+    const sig = JSON.stringify({quant: map.quant, Kmode: map.Kmode, K: map.K, alpha: map.alpha, oct: map.oct});
+    const freqByR = {};
+    if(Array.isArray(rsArr) && Array.isArray(fqArr)){
+      for(let i=0;i<Math.min(rsArr.length, fqArr.length); i++){
+        freqByR[String(rsArr[i])] = Number(fqArr[i]);
+      }
+      __override = {freqByR, sig};
+    } else { __override = null; }
+  }catch(e){ __override = null; }
+  $('inM').value = String(m);
+  $('btnAnalyze').click();
+}
+
+function loadM(m){
+  __pendingSelectRs = null;
+  $('inM').value = String(m);
+  $('btnAnalyze').click();
+}
+function searchChord(){
+  const sym = $('inChord').value;
+  const parsed = parseChordSymbol(sym);
+  if(!parsed){ uiMsg('searchOut', 'Unrecognised chord symbol. Try e.g. Cm7, D#maj7, Gsus4, A5.'); return; }
+  const k = Math.max(1, Math.min(6, parseInt($('inChordVoices').value)||4));
+  const Mfrom = parseInt($('inSearchFrom').value)||2;
+  const Mto   = parseInt($('inSearchTo').value)||5000;
+  const tol = Math.max(5, Math.min(100, parseInt($('inTol').value)||55));
+  const fast = $('inFast').checked;
+  const a = parseInt($('ina').value)||2;
+  const map = currentMapping();
+
+  // Init progress UI
+  const progEl = $('searchProg');
+  const statEl = $('searchStat');
+  if(progEl){ progEl.max = Math.max(1, (Mto - Mfrom + 1)); progEl.value = 0; }
+  if(statEl){ statEl.textContent = 'Starting…'; }
+  $('btnSearchChord').disabled = true;
+  $('btnCancelSearch').disabled = false;
+  searchCancel=false;
+  let m = Math.max(2, Math.min(Mfrom, Mto));
+  const end = Math.max(Mfrom, Mto);
+  const results = [];
+  const maxKeep = 10;
+  const startTime = performance.now();
+
+  function step(){
+      // Progress update at step begin
+      if(progEl){
+        progEl.value = Math.min(progEl.max, Math.max(0, (m - Mfrom)));
+      }
+      if(statEl){
+        const done = Math.max(0, m - 1);
+        statEl.textContent = `m=${done}/${Mto} • ${(performance.now()-startTime)/1000|0} s`;
+      }
+
+    const chunk = 25; // Ms per chunk
+    for(let c=0;c<chunk && m<=end; c++, m++){
+      if(searchCancel){ $('btnSearchChord').disabled=false; $('btnCancelSearch').disabled=true; uiMsg('searchOut', 'Cancelled.'); return; }
+      try{
+        const M = BigInt(m);
+        const pps = factorPrimePowers(M);
+        if(pps.length===0) continue;
+        const wf = fast ? 1 : (parseInt($('inWF').value)||2);
+        const {Ns, A90, Ei, Sa, Emin, Ek2} = buildAllE(Number(M), a, wf, pps);
+        // Estimate T, keep top-k by power (from spectral P)
+        let cands=[];
+        for(let i=0;i<pps.length;i++){
+          const est = estimateT_from_S_fundamental(Ns, Sa[i], 2, 400);
+          cands.push({T:est.T, power:est.power, r:pps[i].r, label:`r=${pps[i].p.toString()}^${pps[i].e}`});
+        }
+        cands.sort((a,b)=> b.power-a.power);
+        const picks = cands.slice(0, Math.min(k, cands.length));
+        if(picks.length===0) continue;
+        const freqs = picks.map(o=> computeFreqFromT(o.T, map));
+        const sc = scoreAgainstTargetChord(freqs, parsed);
+        if(sc.score>0.3){ // keep only decent matches
+          const notes = freqs.map(f=> noteLabel(f, map.quant)).join(', ');
+          const obj = {M: m, score: sc.score, notes, freqs, picks};
+          results.push(obj);
+          results.sort((x,y)=> y.score-x.score);
+          if(results.length>maxKeep) results.pop();
+        }
+      }catch(e){
+        // skip heavy M
+      }
+    }
+    const elapsed = (performance.now()-startTime)/1000;
+    // Render partial results
+    let txt = `Searching ${sym} with k=${k}, base a=${a}. Scanned up to M=${m-1}/${end} in ${elapsed.toFixed(1)} s.\n\nTop candidates:\n`;
+    for(const r of results){
+      txt += `• M=${r.M}  | score ${(r.score*100).toFixed(0)}% | notes: ${r.notes}    ` +
+             `   [Load]\n`;
+    }
+    
+    if(progEl){
+      progEl.value = Math.min(progEl.max, Math.max(0, (m - Mfrom)));
+    }
+    if(statEl){
+      statEl.textContent = `m=${m-1}/${Mto} • ${elapsed.toFixed(1)} s`;
+    }
+uiMsg('searchOut', txt);
+    // Install "Load" buttons as inline handler via result parsing
+    const outDiv = $('searchOut');
+    outDiv.innerHTML = outDiv.textContent.replace(/\[Load\]/g, `<button class="ghost" onclick="loadM(this.getAttribute('data-m'))" data-m="">Load</button>`);
+    // Recreate with data-m attributes properly
+    const lines = outDiv.innerText.split('\n');
+    outDiv.innerHTML='';
+    for(const r of results){
+      const card = document.createElement('div'); card.className='result-card';
+      const btn = document.createElement('button'); btn.className='ghost'; btn.textContent='Load';
+      btn.onclick = ()=> loadMWithPicks(r.M, r.picks.map(p=>String(p.r)), r.freqs);
+      card.innerHTML = `<b>M=${r.M}</b> · ${(r.score*100).toFixed(0)}% · notes: ${r.notes}`;
+      card.appendChild(btn);
+      outDiv.appendChild(card);
+    }
+    if(m<=end){
+      setTimeout(step, 0);
+    }else{
+      $('btnSearchChord').disabled=false; $('btnCancelSearch').disabled=true;
+      const finalTxt = outDiv.innerHTML + `<div class="hint">Done.</div>`;
+      outDiv.innerHTML = outDiv.innerHTML; // keep cards
+    }
+  }
+  step();
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Copyright persistence
+  const cpy = $('cpy');
+  try{
+    const saved = localStorage.getItem('cols_copyright');
+    if(saved) cpy.textContent = saved;
+    cpy.addEventListener('input', ()=> localStorage.setItem('cols_copyright', cpy.textContent));
+  }catch(e){}
+
+  const inM=$('inM'), ina=$('ina'), inWF=$('inWF'), inAgg=$('inAgg');
+  const btnAnalyze=$('btnAnalyze'), colsOut=$('colsOut');
+  const inKmode=$('inKmode'), inAlpha=$('inAlpha'), inQuant=$('inQuant'), inOct=$('inOct');
+  const inDur=$('inDur'), inWave=$('inWave'), inMode=$('inMode'), inLoop=$('inLoop');
+  const voiceCount=$('voiceCount'), playOut=$('playOut');
+  const inLenMode=$('inLenMode'), inCycles=$('inCycles'), cyclesWrap=$('cyclesWrap'), timeWrap=$('timeWrap');
+  // v24: overlay shows current M; Enter/Change on M triggers analyze
+  try{
+    const overlay = document.getElementById('MOverlay');
+    const syncM = ()=>{ if(overlay) overlay.textContent = 'M = ' + (inM.value||'…'); };
+    syncM();
+    inM.addEventListener('input', syncM);
+    inM.addEventListener('change',(e)=>{ syncM(); const busy=document.getElementById('busyAnalyze'); if(busy){busy.classList.add('on');} btnAnalyze.click(); });
+    inM.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); const busy=document.getElementById('busyAnalyze'); if(busy){busy.classList.add('on');} btnAnalyze.click(); }});
+  }catch(e){}
+
+
+  function refreshLenUI(){
+    if(inLenMode.value==='cycles'){
+      cyclesWrap.style.display='block'; timeWrap.style.display='none';
+    }else{
+      cyclesWrap.style.display='none'; timeWrap.style.display='block';
+    }
+  }
+  inLenMode.addEventListener('change', refreshLenUI);
+  refreshLenUI();
+
+  // Selection helpers
+  $('selAll').onclick = ()=>{
+    document.querySelectorAll('.voiceChk').forEach(cb=> cb.checked=true);
+    const sel=$('voiceSelect'); for(let i=0;i<sel.options.length;i++) sel.options[i].selected=true;
+    updateChordInference();
+  };
+  $('selNone').onclick = ()=>{
+    document.querySelectorAll('.voiceChk').forEach(cb=> cb.checked=false);
+    const sel=$('voiceSelect'); for(let i=0;i<sel.options.length;i++) sel.options[i].selected=false;
+    updateChordInference();
+  };
+  $('selInvert').onclick = ()=>{
+    const sel=$('voiceSelect'); const cbx=document.querySelectorAll('.voiceChk');
+    for(let i=0;i<cbx.length;i++){ cbx[i].checked=!cbx[i].checked; sel.options[i].selected=cbx[i].checked; }
+    updateChordInference();
+  };
+  $('selTopN').onclick = ()=>{
+    const Nwant = parseInt(voiceCount.value,10);
+    const sel=$('voiceSelect'); const cbx=document.querySelectorAll('.voiceChk');
+    const order = candidates.map((c,i)=>({i, p:c.power})).sort((a,b)=> b.p-a.p);
+    for(let i=0;i<cbx.length;i++){ cbx[i].checked=false; sel.options[i].selected=false; }
+    for(let k=0;k<Math.min(Nwant, order.length); k++){ const idx=order[k].i; cbx[idx].checked=true; sel.options[idx].selected=true; }
+    updateChordInference();
+  };
+
+  btnAnalyze.onclick = ()=>{
+  const __busy = document.getElementById('busyAnalyze');
+  if(__busy){ __busy.classList.add('on'); }
+  const __run = ()=>{
+const M = BigInt(inM.value);
+    const a = parseInt(ina.value,10);
+    const wf = parseInt(inWF.value,10) || 4;
+    let pps=[];
+    try{ pps = factorPrimePowers(M); }
+    catch(e){ uiMsg('colsOut','Factorisation too heavy for this M (or browser). Try a smaller M.'); return; }
+    const {Ns:NsLoc, A90:A90Loc, Ei:EiLoc, Sa:SaLoc, Emin, Ek2} = buildAllE(Number(M), a, wf, pps);
+    Ns=NsLoc; A90=A90Loc; Ei=EiLoc; Si=SaLoc;
+    const EaggLoc = (inAgg.value==='min')? Emin: Ek2;
+    Eagg = EaggLoc;
+
+    candidates = [];
+    for(let i=0;i<pps.length;i++){
+      const obj = pps[i];
+      const rlabelHTML = `r=${obj.p.toString()}<sup>${obj.e}</sup>`;
+      const rlabelPlain = `r=${obj.p.toString()}^${obj.e}`;
+      const est = estimateT_from_S_fundamental(Ns, Si[i], 2, 400);
+      candidates.push({label:rlabelHTML, plainLabel:rlabelPlain, r:obj.r, T:est.T, power:est.power, f:0, checked:true});
+    }
+    candidates.sort((a,b)=> b.power - a.power);
+    rebuildVoiceList();
+    updateChordInference();
+    // If a chord-search result was loaded with suggested picks, enforce that selection now.
+    if(Array.isArray(__pendingSelectRs) && __pendingSelectRs.length){
+      try{
+        const cbx = document.querySelectorAll('.voiceChk');
+        const sel = $('voiceSelect');
+        // Uncheck all first
+        for(let i=0;i<cbx.length;i++){ cbx[i].checked=false; if(sel.options[i]) sel.options[i].selected=false; }
+        // Select candidates whose prime-power r matches the suggested list
+        const rsSet = new Set(__pendingSelectRs.map(x=> typeof x==='bigint'? x : BigInt(x)));
+        for(let i=0;i<candidates.length;i++){
+          if(rsSet.has(candidates[i].r)){
+            if(cbx[i]) cbx[i].checked = true;
+            if(sel.options[i]) sel.options[i].selected = true;
+          }
+        }
+        // If nothing matched (edge case), fall back to default behaviour.
+      }catch(e){ /* ignore */ }
+    }
+
+    uiMsg('colsOut', `Prime powers: ${pps.map(o=> o.p.toString()+'^'+o.e).join(' · ')}
+Voices found: ${candidates.length} (sorted by strength)`);
+    refreshFreqLabels();
+    updateChordInference();
+  };
+  setTimeout(()=>{ try{ __run(); } finally { if(__busy){ __busy.classList.remove('on'); } } }, 0);
+};
+
+  ['inAlpha','inKmode','inQuant','inOct'].forEach(id=>{
+    $(id).addEventListener('input', ()=>{ refreshFreqLabels(); updateChordInference(); });
+    $(id).addEventListener('change', ()=>{ refreshFreqLabels(); updateChordInference(); });
+  });
+
+  $('btnPlay').onclick = async ()=>{
+    if(!Eagg || !candidates.length){ uiMsg('playOut','Click “Analyse & list voices” first.'); return; }
+    const map = currentMapping();
+    let picks = gatherPicks();
+    if(picks.length===0){ uiMsg('playOut','No voices available.'); return; }
+    const freqs = picks.map(c=> computeFreqFromT(c.T, map));
+
+    let duration;
+    if(inLenMode.value==='cycles'){
+      duration = computeDurationFromCycles(freqs, picks);
+    }else{
+      duration = Math.max(0.1, parseFloat(inDur.value)||8);
+    }
+
+    const wave=inWave.value, mode=inMode.value, loop=inLoop.checked;
+    let env = makeEnvelopeFromE(Eagg, Math.floor(44100*duration), 0.06, 1.0);
+    let step=0.25;
+    if(mode==='tempo'){ step = dominantStepSecondsFromEnv(env, duration); }
+    if(inLenMode.value==='cycles' && mode!=='chord'){
+      const nSteps = Math.max(1, Math.round(duration/step));
+      duration = nSteps * step;
+      env = makeEnvelopeFromE(Eagg, Math.floor(44100*duration), 0.06, 1.0);
+    }
+
+    const samples = synthSignal({freqs: freqs, duration: duration, waveform: wave, mode: mode, env: env, step: step});
+    lastSamples = samples;
+    await playSamples(samples, loop);
+    const refTxt = (inLenMode.value==='cycles')? `, ${$('inCycles').value} cycles on ${$('refVoiceOut').textContent.replace('Reference voice: ','')}`:'';
+    uiMsg('playOut', `Now playing ${loop?'(loop) ':''}— voices=${freqs.length}, ${mode}${mode==='tempo'?' (step≈'+step.toFixed(2)+' s)':''}${refTxt}`);
+  };
+  $('btnStop').onclick = ()=>{ stopPlayback(); uiMsg('playOut','Stopped.'); };
+  $('btnExport').onclick = ()=>{
+    if(!lastSamples){ uiMsg('playOut','Nothing to export. Click ▶︎ Play first.'); return; }
+    const url = URL.createObjectURL(encodeWAV(lastSamples));
+    const a=document.createElement('a'); a.href=url; a.download='COLS_SoundLab_V24__M='+document.getElementById('inM').value+'.wav'; a.click(); setTimeout(()=>URL.revokeObjectURL(url), 1500);
+  };
+
+  // Chord search handlers
+  $('btnSearchChord').onclick = ()=> searchChord();
+  $('btnCancelSearch').onclick = ()=> { searchCancel = true; $('btnCancelSearch').disabled=true; };
+});
+
+// Ensure Cancel clears output even if no search is running
+document.getElementById('btnCancelSearch').addEventListener('click', ()=>{
+  try{ uiMsg('searchOut',''); }catch(e){}
+  try{ const p=$('searchProg'); if(p){ p.value=0; } }catch(e){}
+  try{ const s=$('searchStat'); if(s){ s.textContent='Cancelled.'; } }catch(e){}
+});
+
+// Use detected chord as search target
+(function(){
+  const btn = document.getElementById('btnSearchFromDetected');
+  if(btn){
+    btn.addEventListener('click', ()=>{
+      if(window.detectedChordSymbol){
+        $('inChord').value = window.detectedChordSymbol;
+      }
+      // Trigger search if not already running
+      if(!$('btnSearchChord').disabled){
+        searchChord();
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>
+    
+    
